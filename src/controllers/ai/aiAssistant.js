@@ -1,4 +1,5 @@
-import groq from "../../config/groq.js";
+import { generateAIResponse } from "../../services/aiService.js";
+import assistantPrompt from "../../ai/prompts/assistantPrompt.js";
 
 const aiAssistant = async (req, res) => {
   try {
@@ -11,26 +12,14 @@ const aiAssistant = async (req, res) => {
       });
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an AI assistant for a social media platform called ConnectTo. Help users with captions, hashtags, engagement tips, profiles, posts, and platform guidance.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
-    });
+    const response = await generateAIResponse(
+      assistantPrompt,
+      prompt
+    );
 
     return res.status(200).json({
       success: true,
-      response: completion.choices[0].message.content,
+      response,
     });
   } catch (error) {
     return res.status(500).json({

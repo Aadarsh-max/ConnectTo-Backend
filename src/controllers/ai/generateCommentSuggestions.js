@@ -1,4 +1,5 @@
-import groq from "../../config/groq.js";
+import { generateAIResponse } from "../../services/aiService.js";
+import commentPrompt from "../../ai/prompts/commentPrompt.js";
 
 const generateCommentSuggestions = async (req, res) => {
   try {
@@ -11,26 +12,12 @@ const generateCommentSuggestions = async (req, res) => {
       });
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Generate 5 short engaging social media comment suggestions for the given post.",
-        },
-        {
-          role: "user",
-          content: postCaption,
-        },
-      ],
-      temperature: 0.8,
-      max_tokens: 200,
-    });
+    const response = await generateAIResponse(commentPrompt, postCaption, 200);
 
-    const suggestions = completion.choices[0].message.content
+    const suggestions = response
       .split("\n")
-      .filter((comment) => comment.trim() !== "");
+      .map((comment) => comment.trim())
+      .filter(Boolean);
 
     return res.status(200).json({
       success: true,

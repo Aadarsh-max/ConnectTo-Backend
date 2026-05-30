@@ -1,4 +1,5 @@
-import groq from "../../config/groq.js";
+import { generateAIResponse } from "../../services/aiService.js";
+import captionPrompt from "../../ai/prompts/captionPrompt.js";
 
 const generateCaption = async (req, res) => {
   try {
@@ -11,26 +12,15 @@ const generateCaption = async (req, res) => {
       });
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Generate engaging social media captions with emojis and relevant hashtags.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      temperature: 0.8,
-      max_tokens: 300,
-    });
+    const caption = await generateAIResponse(
+      captionPrompt,
+      prompt,
+      300
+    );
 
     return res.status(200).json({
       success: true,
-      caption: completion.choices[0].message.content,
+      caption,
     });
   } catch (error) {
     return res.status(500).json({
